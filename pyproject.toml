@@ -1,0 +1,31 @@
+[tool.poetry]
+name = "hexlet-code"
+version = "0.1.0"
+description = "PageLoader - is a command-line utility that downloads pages from the internet and stores them locally."
+authors = ["AABur <aabur@mail.ru>"]
+license = "MIT"
+readme = "README.md"
+repository = "https://github.com/AABur/python-project-lvl3"
+packages = [
+    { include = "pageloader" },
+]
+
+[tool.poetry.scripts]
+pageloader = "pageloader.scripts.main:main"
+
+[tool.poetry.dependencies]
+python = "^3.6"
+requests = "^2.25.1"
+
+[tool.poetry.dev-dependencies]
+requests-mock = "^1.8.0"
+wemake-python-styleguide = "^0.14.1"
+pyformat = "^0.7"
+pytest = "^6.2.2"
+pytest-cov = "^2.11.1"
+coverage = "^5.4"
+rope = "^0.18.0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

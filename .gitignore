@@ -1,0 +1,16 @@
+# Hexlet.io Python Boilerplate
+*.egg-info
+__pycache__
+dist/
+*.pyc
+.venv/
+# Git Time Metric
+.gtm/
+# VS Code
+.vscode/*
+# pytest
+.coverage
+.mutmut-cache
+htmlcov/
+html/
+coverage_html/
