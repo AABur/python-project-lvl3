@@ -7,7 +7,7 @@ license = "MIT"
 readme = "README.md"
 repository = "https://github.com/AABur/python-project-lvl3"
 packages = [
-    { include = "page-loader" },
+    { include = "page_loader" },
 ]
 
 [tool.poetry.scripts]
