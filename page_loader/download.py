@@ -8,8 +8,6 @@ import requests
 
 
 def download(page_url, output_dir):
-    if not os.access(output_dir, os.W_OK):
-        sys.exit('ERROR !!!')
     response = requests.get(page_url)
     file_name = create_file_name(page_url)
     file_path = Path(PurePath(output_dir, file_name))
