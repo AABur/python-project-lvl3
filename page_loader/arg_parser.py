@@ -5,21 +5,26 @@ import argparse
 
 def arg_parser():
     parser = argparse.ArgumentParser(
-        description='Generate difference of two JSON or YAML files.',
+        description='CLI utility that downloads pages from the internet and stores them locally.',  # noqa: E501
+    )
+    parser.add_argument(
+        '-V',
+        '--version',
+        action='version',
+        version='%(prog)s 0.1.0',  # noqa: WPS323
+    )
+    parser.add_argument(
+        '-o',
+        '--output',
+        type=str,
+        dest='output_dir',
+        metavar='[dir]',
+        default='./',
+        help='output dir (default: "./")',
     )
     parser.add_argument(
         'page_url',
         type=str,
-        help='page url',
-    )
-    parser.add_argument(
-        'output_dir',
-        type=str,
-        default='.',
-        help="output dir (default: '{0}')".format('.'),
-    )
-    parser.add_argument(
-        '--output',
-        type=str,
+        help='page url to download',
     )
     return parser
