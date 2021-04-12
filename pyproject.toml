@@ -7,11 +7,11 @@ license = "MIT"
 readme = "README.md"
 repository = "https://github.com/AABur/python-project-lvl3"
 packages = [
-    { include = "pageloader" },
+    { include = "page_loader" },
 ]
 
 [tool.poetry.scripts]
-pageloader = "pageloader.scripts.main:main"
+pageloader = "page_loader.scripts.main:main"
 
 [tool.poetry.dependencies]
 python = "^3.6"
