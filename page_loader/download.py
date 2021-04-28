@@ -7,14 +7,21 @@ from bs4 import BeautifulSoup
 
 
 def download(page_url, output_dir):
+
+    # download html
     file_name = create_file_name(page_url)
     file_path = Path(PurePath(output_dir, file_name))
     response = requests.get(page_url)
+    file_path.write_text(response.text)
     soup = BeautifulSoup(response.content, 'lxml')
     images = soup.find_all('img')
     for image in images:
-        print(image.get('src'))
-    file_path.write_text(response.text)
+        link = image['src']
+        img_file_name = create_file_name(link)
+        img_file_path = Path(PurePath(output_dir, img_file_name))
+        im = requests.get(link)
+        img_file_path.write_bytes(im.content)
+
     return file_path
 
 
