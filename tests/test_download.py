@@ -6,8 +6,9 @@
 # 'requests_mock' fixture
 # https://requests-mock.readthedocs.io/en/latest/pytest.html
 
+from pathlib import Path, PurePath
+
 import pytest
-from pathlib import PurePath
 
 from page_loader.download import create_file_name, download
 
@@ -32,17 +33,19 @@ def test_create_file_name(file_url, file_name):
     assert file_name == created_file_name
 
 
-def test_download_img(tmpdir, requests_mock):
-    requested_img_file = PurePath('tests/fixtures/received/prof_python.png')
-    expected_img_file = PurePath(
-        'tests/fixtures/expected/ru-hexlet-io-courses_files/ru-hexlet-io-assets-professions-prof-python.png',  # noqa E501
+def test_download(tmpdir, requests_mock):
+    received_html = Path(PurePath('tests/fixtures/remote-page.html'))
+    received_page = received_html.read_bytes()
+    expected_html = Path(
+        PurePath('tests/fixtures/remote-page.html'),
     )
+    expected_page = expected_html.read_bytes()
     requests_mock.get(
-        '/assets/professions/prof_python.png',
-        content=requested_img_file,
+        'https://ru.hexlet.io/courses',
+        content=received_page,
     )
-    file_path = download(
-        'https://ru.hexlet.io/assets/professions/prof_python.png', tmpdir,
+    actual_html = download(
+        'https://ru.hexlet.io/courses', tmpdir,
     )
-    file_content = file_path.read_text()
-    assert expected_img_file == requested_img_file
+    actual_page = actual_html.read_bytes()
+    assert expected_page == actual_page
