@@ -14,5 +14,3 @@ dist/
 htmlcov/
 html/
 coverage_html/
-#DeepCode
-.dccache
