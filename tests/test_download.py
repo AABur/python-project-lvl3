@@ -33,7 +33,25 @@ def test_create_file_name(file_url, file_name):
     assert file_name == created_file_name
 
 
-def test_download(tmpdir, requests_mock):
+def test_download_html(tmpdir, requests_mock):
+    received_html = Path(PurePath('tests/fixtures/remote-page.html'))
+    received_page = received_html.read_bytes()
+    expected_html = Path(
+        PurePath('tests/fixtures/remote-page.html'),
+    )
+    expected_page = expected_html.read_bytes()
+    requests_mock.get(
+        'https://ru.hexlet.io/courses',
+        content=received_page,
+    )
+    actual_html = download(
+        'https://ru.hexlet.io/courses', tmpdir,
+    )
+    actual_page = actual_html.read_bytes()
+    assert expected_page == actual_page
+
+
+def test_download_img(tmpdir, requests_mock):
     received_html = Path(PurePath('tests/fixtures/remote-page.html'))
     received_page = received_html.read_bytes()
     expected_html = Path(
