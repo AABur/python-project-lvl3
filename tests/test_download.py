@@ -11,9 +11,19 @@ from urllib.parse import urljoin
 
 import pytest
 
-from page_loader.download import download, generate_file_name
+from page_loader.engine import compose_path_name, download
 
 PAGE_URL = 'https://ru.hexlet.io/courses'
+
+
+@pytest.mark.parametrize(
+    'file_url, file_name',
+    [
+        ('https://ru.hexlet.io/courses', 'ru-hexlet-io-courses.html'),
+    ],
+)
+def test_compose_path_name_page(file_url, file_name):
+    assert file_name == compose_path_name(file_url, 'page')
 
 
 @pytest.mark.parametrize(
@@ -33,6 +43,19 @@ def test_create_file_name_full_path(file_url, file_name):
 @pytest.mark.parametrize(
     'file_url, file_name',
     [
+        (
+            'https://ru.hexlet.io/packs/js/runtime.js',
+            'ru-hexlet-io-packs-js-runtime.js',
+        ),
+    ],
+)
+def test_compose_path_name_asset_full(file_url, file_name):
+    assert file_name == compose_path_name(file_url, 'asset')
+
+
+@pytest.mark.parametrize(
+    'file_url, file_name',
+    [
         ('/assets/application.css', 'ru-hexlet-io-assets-application.css'),
         (
             '/assets/professions/prof_python.png',
@@ -40,9 +63,9 @@ def test_create_file_name_full_path(file_url, file_name):
         ),
     ],
 )
-def test_create_file_name_relative_path(file_url, file_name):
+def test_compose_path_name_asset_relative(file_url, file_name):
     full_url = urljoin(PAGE_URL + '/', file_url)
-    assert file_name == generate_file_name(full_url)
+    assert file_name == compose_path_name(full_url, 'asset')
 
 
 def test_download_html(tmpdir, requests_mock):
