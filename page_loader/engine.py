@@ -93,7 +93,8 @@ def compose_path_name(resource_url: str, resource_type: str) -> str:
     file_name = re.sub(r'\W+', '-', file_path)
     # FIXME need refactoring
     if resource_type == 'asset':
-        return str(file_name + ext)
+        path_ext = ext or '.html'
+        return str(file_name + path_ext)
     elif resource_type == 'dir':
         return str(file_name + '_files')
     elif resource_type == 'page':
