@@ -16,16 +16,7 @@ from urllib.parse import urljoin, urlparse
 import requests
 from bs4 import BeautifulSoup
 
-logging.basicConfig(
-    level=logging.DEBUG,
-    format='%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
-    datefmt='%m-%d %H:%M',
-    filename='page_loader.log',
-    filemode='w',
-)
-logger = logging.getLogger(__name__)
-logging.getLogger('urllib3').setLevel(logging.CRITICAL)
-
+logger = logging.getLogger('page-loader')
 
 TAGS = {  # noqa:WPS407
     'link': 'href',
@@ -48,27 +39,35 @@ def download(page_url: str, target_dir: str = '') -> str:
     assets_dir_name = compose_path_name(page_url, 'dir')
     page_file_path = Path(Path(Path.cwd(), target_dir), local_page_name)
     assets_dir_path = Path(Path(Path.cwd(), target_dir), assets_dir_name)
-    logger.info('Start downloading {page_url} to {target_dir}'.format(
-        page_url=page_url, target_dir=page_file_path),
-    )
+    logger.debug(
+        'Start downloading {page_url} to {target_dir}'.format(
+            page_url=page_url, target_dir=page_file_path,
+        ))
+    logger.debug('111')
     try:
         Path(assets_dir_path).mkdir(exist_ok=True)
-    except Exception as exc:
-        logger.error(exc)
+    except Exception:
+        logger.error('Failed to mkdir', exc_info=True)
         sys.exit(1)
     # collect remote assets and preapre local html-page
-    local_html = fetch_assets(
-        requests.get(page_url).text,
-        page_url,
-        assets_dir_name,
-        assets_dir_path,
-    )
+    logger.debug('222')
+    try:
+        local_html = fetch_assets(
+            requests.get(page_url).text,
+            page_url,
+            assets_dir_name,
+            assets_dir_path,
+        )
+    except Exception:
+        logger.error('Failed to fetch_assets', exc_info=True)
+        sys.exit(1)
+    logger.debug('333')
     try:
         Path(page_file_path).write_text(local_html)  # save html-page locally
-    except Exception as exc:
-        logger.error(exc)
+    except Exception:
+        logger.error('Failed to write file', exc_info=True)
         sys.exit(1)
-    logger.info('Finish downloading {page_url} to {target_dir}'.format(
+    logger.debug('Finish downloading {page_url} to {target_dir}'.format(
         page_url=page_url, target_dir=page_file_path),
     )
     return str(page_file_path)
@@ -86,7 +85,7 @@ def fetch_assets(html_page: str, page_url: str, assets_dir_name: str, assets_pat
     Returns:
         Any: local HTML file
     """
-    logger.info('Start downloading assets')
+    logger.debug('Start downloading assets')
     soup = BeautifulSoup(html_page, 'lxml')
     tags_list = soup.find_all(TAGS.keys())
     for source_tag in tags_list:
@@ -95,19 +94,26 @@ def fetch_assets(html_page: str, page_url: str, assets_dir_name: str, assets_pat
         if not asset_url:
             continue
         full_asset_url = urljoin(page_url + '/', asset_url)
+        logger.debug(full_asset_url)
         if urlparse(full_asset_url).netloc == urlparse(page_url).netloc:
             local_file_name = compose_path_name(full_asset_url, 'asset')
             full_asset_path = Path(assets_path, local_file_name)
             logger.debug(
                 'Start downloading assets {full_asset_url}'.format(full_asset_url=full_asset_url))
-            asset_content = requests.get(full_asset_url, stream=True).content
+            try:
+                asset_content = requests.get(
+                    full_asset_url, stream=True).content
+            except Exception:
+                logger.error('Failed to access to asset', exc_info=True)
+                sys.exit(1)
+            logger.debug('555')
             try:
                 Path(full_asset_path).write_bytes(asset_content)
-            except Exception as exc:
-                logger.error(exc)
+            except Exception:
+                logger.error('Failed to write asset file', exc_info=True)
                 sys.exit(1)
             source_tag[attribute_name] = Path(assets_dir_name, local_file_name)
-    logger.info('Finish downloading assets')
+    logger.debug('Finish downloading assets')
     return soup.prettify(formatter='html5')
 
 
