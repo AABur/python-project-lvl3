@@ -4,7 +4,6 @@
 Returns:
     str: local HTML page
 """
-
 import logging
 import os
 import re
@@ -15,6 +14,7 @@ from urllib.parse import urljoin, urlparse
 
 import requests
 from bs4 import BeautifulSoup
+from progress.bar import IncrementalBar
 
 logger = logging.getLogger('page-loader')
 
@@ -67,13 +67,20 @@ def download(page_url: str, target_dir: str = '') -> str:
     except Exception:
         logger.error('Failed to write file', exc_info=True)
         sys.exit(1)
-    logger.debug('Finish downloading {page_url} to {target_dir}'.format(
-        page_url=page_url, target_dir=page_file_path),
+    logger.debug(
+        'Finish downloading {page_url} to {target_dir}'.format(
+            page_url=page_url, target_dir=page_file_path,
+        ),
     )
     return str(page_file_path)
 
 
-def fetch_assets(html_page: str, page_url: str, assets_dir_name: str, assets_path: Path) -> Any:   # noqa: E501  # FIXME assign specific type
+def fetch_assets(
+    html_page: str,
+    page_url: str,
+    assets_dir_name: str,
+    assets_path: Path,
+) -> Any:   # noqa: E501  # FIXME assign specific type
     """Fetches the assets from the given page URL and saves it in the assets_dir .
 
     Args:
@@ -88,6 +95,7 @@ def fetch_assets(html_page: str, page_url: str, assets_dir_name: str, assets_pat
     logger.debug('Start downloading assets')
     soup = BeautifulSoup(html_page, 'lxml')
     tags_list = soup.find_all(TAGS.keys())
+    bar = IncrementalBar('Downloading')
     for source_tag in tags_list:
         attribute_name = TAGS.get(source_tag.name)
         asset_url = source_tag.get(attribute_name)
@@ -99,10 +107,14 @@ def fetch_assets(html_page: str, page_url: str, assets_dir_name: str, assets_pat
             local_file_name = compose_path_name(full_asset_url, 'asset')
             full_asset_path = Path(assets_path, local_file_name)
             logger.debug(
-                'Start downloading assets {full_asset_url}'.format(full_asset_url=full_asset_url))
+                'Start downloading assets {full_asset_url}'.format(
+                    full_asset_url=full_asset_url,
+                ),
+            )
             try:
                 asset_content = requests.get(
-                    full_asset_url, stream=True).content
+                    full_asset_url, stream=True,
+                ).content
             except Exception:
                 logger.error('Failed to access to asset', exc_info=True)
                 sys.exit(1)
@@ -113,6 +125,8 @@ def fetch_assets(html_page: str, page_url: str, assets_dir_name: str, assets_pat
                 logger.error('Failed to write asset file', exc_info=True)
                 sys.exit(1)
             source_tag[attribute_name] = Path(assets_dir_name, local_file_name)
+        bar.next()
+    bar.finish()
     logger.debug('Finish downloading assets')
     return soup.prettify(formatter='html5')
 
