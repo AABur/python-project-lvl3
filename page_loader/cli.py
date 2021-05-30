@@ -7,7 +7,7 @@ import argparse
 def arg_parser():
     """Creates an argument parser for the command line interface."""
     parser = argparse.ArgumentParser(
-        description='CLI utility that downloads pages from the internet and stores them locally.',  # noqa: E501
+        description='CLI utility to download locally pages from url provided.',  # noqa: E501
     )
     parser.add_argument(
         '-V',
