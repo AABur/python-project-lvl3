@@ -95,11 +95,16 @@ def fetch_assets(
     logger.debug('Start downloading assets')
     soup = BeautifulSoup(html_page, 'lxml')
     tags_list = soup.find_all(TAGS.keys())
-    bar = IncrementalBar('Downloading')
+    bar = IncrementalBar(
+        'Downloading',
+        max=len(tags_list),
+        suffix='%(percent).1f%% [%(elapsed)ds]',
+    )
     for source_tag in tags_list:
         attribute_name = TAGS.get(source_tag.name)
         asset_url = source_tag.get(attribute_name)
         if not asset_url:
+            bar.next()
             continue
         full_asset_url = urljoin(page_url + '/', asset_url)
         logger.debug(full_asset_url)
