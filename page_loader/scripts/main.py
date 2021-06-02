@@ -2,9 +2,6 @@
 # -*- coding:utf-8 -*-
 """Download a page from the command line."""
 
-# TODO: add exceptions handling for operations with files and dirs
-# TODO: add exceptions handling for network errors
-
 
 import logging
 
@@ -21,7 +18,8 @@ ch = logging.StreamHandler()
 ch.setLevel(logging.INFO)
 # create formatter and add it to the handlers
 formatter = logging.Formatter(
-    '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    '%(asctime)s - %(name)s - %(levelname)s - %(message)s',   # noqa:WPS323
+)
 fh.setFormatter(formatter)
 ch.setFormatter(formatter)
 # add the handlers to the logger
@@ -30,7 +28,7 @@ logger.addHandler(ch)
 
 
 def main():
-    """Download the page ."""
+    """Download the page."""
     logger.info('START')
     args = arg_parser().parse_args()
     print(download(args.page_url, args.output_dir))

@@ -5,9 +5,13 @@ import argparse
 
 
 def arg_parser():
-    """Creates an argument parser for the command line interface."""
+    """Create a parser for command line arguments .
+
+    Returns:
+        ArgumentParser
+    """
     parser = argparse.ArgumentParser(
-        description='CLI utility to download locally pages from url provided.',  # noqa: E501
+        description='CLI utility to download locally pages from url provided.',
     )
     parser.add_argument(
         '-V',

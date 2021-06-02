@@ -1,5 +1,5 @@
 # -*- coding:utf-8 -*-
-"""Load page."""
+"""Load page from url."""
 
 from page_loader.engine import download
 
