@@ -110,7 +110,8 @@ def compose_local_name(resource_url: str, resource_type: str = '') -> str:
     """
     url_parse = urlparse(resource_url)
     ext = Path(url_parse.path).suffix
-    file_name = (url_parse.netloc + url_parse.path).removesuffix(ext)
+    pattern = rf'{ext}$'
+    file_name = re.sub(pattern, '', url_parse.netloc + url_parse.path)
     file_name = re.sub(r'\W+', '-', file_name)
     if resource_type == 'dir':
         return str(file_name + '_files')  # noqa:WPS336
