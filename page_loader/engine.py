@@ -5,7 +5,6 @@ Returns:
     str: local HTML page
 """
 import logging
-import os
 import re
 import sys
 from pathlib import Path
@@ -13,16 +12,12 @@ from typing import Any
 from urllib.parse import urljoin, urlparse
 
 import requests
-from bs4 import BeautifulSoup
-from progress.bar import IncrementalBar
+from bs4 import BeautifulSoup  # type: ignore
+from progress.bar import IncrementalBar  # type: ignore
 
 logger = logging.getLogger('page-loader')
 
-TAGS = {  # noqa:WPS407
-    'link': 'href',
-    'script': 'src',
-    'img': 'src',
-}
+TAGS = ('link', 'script', 'img')
 
 
 def download(page_url: str, target_dir: str = '') -> str:
@@ -35,25 +30,22 @@ def download(page_url: str, target_dir: str = '') -> str:
     Returns:
         str: local HTML file full path
     """
-    local_page_name = compose_path_name(page_url, 'page')
-    assets_dir_name = compose_path_name(page_url, 'dir')
-    page_file_path = Path(Path(Path.cwd(), target_dir), local_page_name)
-    assets_dir_path = Path(Path(Path.cwd(), target_dir), assets_dir_name)
+    local_page_name = compose_local_name(page_url)
+    assets_dir_name = compose_local_name(page_url, 'dir')
+    page_file_path = Path(Path.cwd(), target_dir, local_page_name)
+    assets_dir_path = Path(Path.cwd(), target_dir, assets_dir_name)
     logger.debug(
-        'Start downloading {page_url} to {target_dir}'.format(
-            page_url=page_url, target_dir=page_file_path,
-        ))
+        'Start downloading {0} to {1}'.format(page_url, page_file_path))
     logger.debug('111')
     try:
         Path(assets_dir_path).mkdir(exist_ok=True)
     except Exception:
         logger.error('Failed to mkdir', exc_info=True)
         sys.exit(1)
-    # collect remote assets and preapre local html-page
+    # collect remote assets and prepare local html-page
     logger.debug('222')
     try:
         local_html = fetch_assets(
-            requests.get(page_url).text,
             page_url,
             assets_dir_name,
             assets_dir_path,
@@ -67,55 +59,52 @@ def download(page_url: str, target_dir: str = '') -> str:
     except Exception:
         logger.error('Failed to write file', exc_info=True)
         sys.exit(1)
-    logger.debug(
-        'Finish downloading {page_url} to {target_dir}'.format(
-            page_url=page_url, target_dir=page_file_path,
-        ),
-    )
+    logger.debug('Finish downloading {0} to {1}'.format(
+        page_url, page_file_path,
+    ))
     return str(page_file_path)
 
 
 def fetch_assets(
-    html_page: str,
     page_url: str,
     assets_dir_name: str,
     assets_path: Path,
-) -> Any:   # noqa: E501  # FIXME assign specific type
-    """Fetches the assets from the given page URL and saves it in the assets_dir .
+) -> Any:  # bs4 don't have type stub
+    """Download assets from given HTML page and store it in assets directory.
 
     Args:
-        html_page (str): html page
-        page_url (str): html page url
-        assets_dir_name (str): dir for store page
-        assets_path (Path): local dir for assets
+        page_url (str): given HTML page url
+        assets_dir_name (str): assets directory
+        assets_path (Path): [description]
 
     Returns:
-        Any: local HTML file
+        Any: [description]
     """
     logger.debug('Start downloading assets')
-    soup = BeautifulSoup(html_page, 'lxml')
-    tags_list = soup.find_all(TAGS.keys())
+    soup = BeautifulSoup(requests.get(page_url).text, 'lxml')
+    tags_list = soup.find_all(TAGS)
     bar = IncrementalBar(
         'Downloading',
         max=len(tags_list),
-        suffix='%(percent).1f%% [%(elapsed)ds]',
+        suffix='%(percent).1f%% [%(elapsed)ds]',  # noqa:WPS323
     )
+    if not page_url.endswith('/'):
+        page_url = '{0}/'.format(page_url)
+
     for source_tag in tags_list:
-        attribute_name = TAGS.get(source_tag.name)
+        attribute_name = 'src' if source_tag.name in {
+            'script', 'img',
+        } else 'href'
         asset_url = source_tag.get(attribute_name)
         if not asset_url:
             bar.next()
             continue
-        full_asset_url = urljoin(page_url + '/', asset_url)
+        full_asset_url = urljoin(page_url, asset_url)
         logger.debug(full_asset_url)
         if urlparse(full_asset_url).netloc == urlparse(page_url).netloc:
-            local_file_name = compose_path_name(full_asset_url, 'asset')
+            local_file_name = compose_local_name(full_asset_url)
             full_asset_path = Path(assets_path, local_file_name)
-            logger.debug(
-                'Start downloading assets {full_asset_url}'.format(
-                    full_asset_url=full_asset_url,
-                ),
-            )
+            logger.debug('Start downloading assets {0}'.format(full_asset_url))
             try:
                 asset_content = requests.get(
                     full_asset_url, stream=True,
@@ -136,7 +125,7 @@ def fetch_assets(
     return soup.prettify(formatter='html5')
 
 
-def compose_path_name(resource_url: str, resource_type: str) -> str:
+def compose_local_name(resource_url: str, resource_type: str = '') -> str:
     """Compose a path name for a resource.
 
     Args:
@@ -147,15 +136,9 @@ def compose_path_name(resource_url: str, resource_type: str) -> str:
         str: resource local file name
     """
     url_parse = urlparse(resource_url)
-    path, ext = os.path.splitext(url_parse.path)  # FIXME use pathlib instaed
-    file_path = url_parse.netloc + path
-    file_name = re.sub(r'\W+', '-', file_path)
-    # FIXME need refactoring
-    if resource_type == 'asset':
-        path_ext = ext or '.html'
-        return str(file_name + path_ext)
-    elif resource_type == 'dir':
-        return str(file_name + '_files')
-    elif resource_type == 'page':
-        return str(file_name + '.html')
-    return ''
+    ext = Path(url_parse.path).suffix
+    file_name = (url_parse.netloc + url_parse.path).removesuffix(ext)
+    file_name = re.sub(r'\W+', '-', file_name)
+    if resource_type == 'dir':
+        return str(file_name + '_files')  # noqa:WPS336
+    return str(file_name + (ext or '.html'))

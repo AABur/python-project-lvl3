@@ -12,7 +12,7 @@ from bs4 import BeautifulSoup
 
 import pytest
 
-from page_loader.engine import compose_path_name, download
+from page_loader.engine import compose_local_name, download
 
 PAGE_URL = 'https://ru.hexlet.io/courses'
 
@@ -24,7 +24,7 @@ PAGE_URL = 'https://ru.hexlet.io/courses'
     ],
 )
 def test_compose_path_name_page(file_url, file_name):
-    assert file_name == compose_path_name(file_url, 'page')
+    assert file_name == compose_local_name(file_url, 'page')
 
 
 @pytest.mark.parametrize(
@@ -39,7 +39,7 @@ def test_compose_path_name_page(file_url, file_name):
 )
 def test_compose_path_name_asset_relative(file_url, file_name):
     full_url = urljoin(PAGE_URL + '/', file_url)
-    assert file_name == compose_path_name(full_url, 'asset')
+    assert file_name == compose_local_name(full_url, 'asset')
 
 
 def test_download_html(tmpdir, requests_mock, files):
