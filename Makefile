@@ -2,10 +2,10 @@ install: ## Install dependencies
 	@poetry install
 
 test: ## Run tests
-	poetry run coverage run --source=pageloader -m pytest tests
+	poetry run coverage run --source=page_loader -m pytest tests
 
 lint: ## Run linter
-	poetry run flake8 pageloader
+	poetry run flake8 page_loader
 
 selfcheck: ## Checks the validity of the pyproject.toml file
 	poetry check
