@@ -79,11 +79,14 @@ def fetch_assets(page_url: str, assets_dir_name: str, assets_local_dir: Path) ->
                 local_file_name = compose_local_name(full_asset_url)
                 try:
                     get_asset(assets_local_dir, full_asset_url, local_file_name)
-                except ConnectionError:
-                    logger.error('Failed access asset', exc_info=True)
-                    sys.exit(1)
-                except IOError:
-                    logger.error('Failed write asset file', exc_info=True)
+                # except ConnectionError:
+                #     logger.error('Failed access asset', exc_info=True)
+                #     sys.exit(1)
+                # except IOError:
+                #     logger.error('Failed write asset file', exc_info=True)
+                #     sys.exit(1)
+                except Exception:
+                    logger.error('ERROR!!!', exc_info=True)
                     sys.exit(1)
                 source_tag[attribute_name] = Path(
                     assets_dir_name, local_file_name,
