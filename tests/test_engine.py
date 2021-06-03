@@ -10,6 +10,7 @@ from pathlib import Path, PurePath
 from urllib.parse import urljoin
 
 import pytest
+import requests
 from bs4 import BeautifulSoup  # type: ignore
 
 from page_loader.engine import compose_local_name, download
@@ -57,10 +58,15 @@ def test_download_html(tmpdir, requests_mock, files):
     assert epb == apb
 
 
-# def test_connection_error(requests_mock):
-#     invalid_url = 'badsite.com'
-#     requests_mock.get(invalid_url, exc=requests.exceptions.ConnectionError)
-#     with tempfile.TemporaryDirectory() as tmpdirname:
-#         assert not os.listdir(tmpdir)
-#         with pytest.raises(Exception):
-#             assert download(invalid_url, tmpdir)
+@pytest.mark.parametrize(
+    'url, exception',
+    [
+        ('https://badurl.com', requests.exceptions.ConnectTimeout),
+        ('https://badurl.com', requests.exceptions.ConnectionError),
+        ('https://badurl.com', requests.exceptions.HTTPError),
+    ],
+)
+def test_network_errors(requests_mock, tmpdir, url, exception):
+    requests_mock.get(url, exc=exception)
+    with pytest.raises(Exception):
+        download(url, tmpdir)
