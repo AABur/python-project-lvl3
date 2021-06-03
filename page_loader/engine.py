@@ -36,7 +36,7 @@ def download(page_url: str, target_dir: str = '') -> str:
     assets_local_dir = Path(target_dir, assets_dir_name)
     logger.debug(f'Start downloading {page_url} to {page_file_path}')
     try:
-        Path(assets_local_dir).mkdir(exist_ok=True)
+        Path(assets_local_dir).mkdir()
     except Exception:
         logger.error('Failed to mkdir', exc_info=True)
         sys.exit(1)
@@ -79,14 +79,11 @@ def fetch_assets(page_url: str, assets_dir_name: str, assets_local_dir: Path) ->
                 local_file_name = compose_local_name(full_asset_url)
                 try:
                     get_asset(assets_local_dir, full_asset_url, local_file_name)
-                # except ConnectionError:
-                #     logger.error('Failed access asset', exc_info=True)
-                #     sys.exit(1)
-                # except IOError:
-                #     logger.error('Failed write asset file', exc_info=True)
-                #     sys.exit(1)
-                except Exception:
-                    logger.error('ERROR!!!', exc_info=True)
+                except ConnectionError:
+                    logger.error('Failed access asset', exc_info=True)
+                    sys.exit(1)
+                except IOError:
+                    logger.error('Failed write asset file', exc_info=True)
                     sys.exit(1)
                 source_tag[attribute_name] = Path(
                     assets_dir_name, local_file_name,
