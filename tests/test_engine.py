@@ -8,9 +8,9 @@
 
 from pathlib import Path, PurePath
 from urllib.parse import urljoin
-from bs4 import BeautifulSoup
 
 import pytest
+from bs4 import BeautifulSoup  # type: ignore
 
 from page_loader.engine import compose_local_name, download
 
@@ -20,7 +20,7 @@ PAGE_URL = 'https://ru.hexlet.io/courses'
 @pytest.mark.parametrize(
     'file_url, file_name',
     [
-        ('https://ru.hexlet.io/courses', 'ru-hexlet-io-courses.html'),
+        (PAGE_URL, 'ru-hexlet-io-courses.html'),
     ],
 )
 def test_compose_path_name_page(file_url, file_name):
@@ -38,34 +38,29 @@ def test_compose_path_name_page(file_url, file_name):
     ],
 )
 def test_compose_path_name_asset_relative(file_url, file_name):
-    full_url = urljoin(PAGE_URL + '/', file_url)
+    full_url = urljoin(PAGE_URL + '/', file_url)  # noqa:WPS336
     assert file_name == compose_local_name(full_url, 'asset')
 
 
 def test_download_html(tmpdir, requests_mock, files):
 
-    requests_mock.get(
-        'https://ru.hexlet.io/courses',
-        content=files['page_remote'],
-    )
-    requests_mock.get(
-        '/assets/professions/python.png',
-        content=files['image'],
-    )
-    requests_mock.get(
-        '/assets/application.css',
-        content=files['link'],
-    )
-    requests_mock.get(
-        'https://ru.hexlet.io/packs/js/runtime.js',
-        content=files['script'],
-    )
+    requests_mock.get(PAGE_URL, content=files['page_remote'])
+    requests_mock.get('/assets/professions/python.png', content=files['image'])
+    requests_mock.get('/assets/application.css', content=files['link'])
+    requests_mock.get('https://ru.hexlet.io/packs/js/runtime.js', content=files['script'])  # noqa:E501
 
-    actual_html = download(
-        'https://ru.hexlet.io/courses', tmpdir,
-    )
+    actual_html = download(PAGE_URL, tmpdir)
     actual_page = Path(PurePath(actual_html)).read_bytes()
     expected_page = files['page_local']
     apb = BeautifulSoup(actual_page, 'lxml').prettify(formatter='html5')
     epb = BeautifulSoup(expected_page, 'lxml').prettify(formatter='html5')
     assert epb == apb
+
+
+# def test_connection_error(requests_mock):
+#     invalid_url = 'badsite.com'
+#     requests_mock.get(invalid_url, exc=requests.exceptions.ConnectionError)
+#     with tempfile.TemporaryDirectory() as tmpdirname:
+#         assert not os.listdir(tmpdir)
+#         with pytest.raises(Exception):
+#             assert download(invalid_url, tmpdir)
