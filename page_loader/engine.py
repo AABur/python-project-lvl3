@@ -6,7 +6,6 @@ Returns:
 """
 import logging
 import re
-import sys
 from pathlib import Path
 from typing import Any
 from urllib.parse import urljoin, urlparse
@@ -35,21 +34,15 @@ def download(page_url: str, target_dir: str = '') -> str:
     page_file_path = Path(target_dir, local_page_name)
     assets_local_dir = Path(target_dir, assets_dir_name)
     logger.debug(f'Start downloading {page_url} to {page_file_path}')
-    try:
-        Path(assets_local_dir).mkdir()
-    except Exception:
-        handle_exception('Failed to mkdir')
+    Path(assets_local_dir).mkdir()
     # collect remote assets and prepare local html-page
     local_html = fetch_assets(page_url, assets_dir_name, assets_local_dir)
-    try:
-        Path(page_file_path).write_text(local_html)  # save html-page locally
-    except Exception:
-        handle_exception('Failed to write file')
+    Path(page_file_path).write_text(local_html)  # save html-page locally
     logger.debug('Finish downloading {page_url} to {page_file_path}')
     return str(page_file_path)
 
 
-def fetch_assets(page_url: str, assets_dir_name: str, assets_local_dir: Path) -> Any:  # noqa: E501
+def fetch_assets(page_url: str, assets_dir_name: str, assets_local_dir: Path) -> Any:  # noqa: E501, WPS210
     """Download assets from given HTML page and store it in assets directory.
 
     Args:
@@ -64,7 +57,7 @@ def fetch_assets(page_url: str, assets_dir_name: str, assets_local_dir: Path) ->
     try:
         soup = BeautifulSoup(requests.get(page_url).text, 'lxml')
     except Exception:
-        handle_exception('Failed access')
+        logger.error('Failed access', exc_info=True)
     page_url = page_url if page_url.endswith('/') else f'{page_url}/'
     with IncrementalBar(
         'Downloading',
@@ -78,12 +71,7 @@ def fetch_assets(page_url: str, assets_dir_name: str, assets_local_dir: Path) ->
             full_asset_url = urljoin(page_url, source_tag.get(attribute_name))
             if urlparse(full_asset_url).netloc == urlparse(page_url).netloc:
                 local_file_name = compose_local_name(full_asset_url)
-                try:
-                    get_asset(assets_local_dir, full_asset_url, local_file_name)
-                except ConnectionError:
-                    handle_exception('Failed access asset')
-                except IOError:
-                    handle_exception('Failed write asset file')
+                get_asset(assets_local_dir, full_asset_url, local_file_name)
                 source_tag[attribute_name] = Path(
                     assets_dir_name, local_file_name,
                 )
@@ -92,13 +80,13 @@ def fetch_assets(page_url: str, assets_dir_name: str, assets_local_dir: Path) ->
     return soup.prettify(formatter='html5')
 
 
-def handle_exception(message):
-    logger.error(message, exc_info=True)
-    sys.exit(1)
-
-
 def get_asset(assets_local_dir, full_asset_url, local_file_name):
-    asset_content = requests.get(full_asset_url).content
+    try:
+        asset_content = requests.get(full_asset_url).content
+    except ConnectionError:
+        logger.error('Failed access asset', exc_info=True)
+    except IOError:
+        logger.error('Failed write asset file', exc_info=True)
     Path(assets_local_dir, local_file_name).write_bytes(asset_content)
 
 
