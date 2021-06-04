@@ -191,3 +191,9 @@
 2021-05-30 23:19:28,476 - page-loader - DEBUG - 333
 2021-05-30 23:19:28,476 - page-loader - DEBUG - Finish downloading https://towardsdatascience.com/3-tools-to-track-and-visualize-the-execution-of-your-python-code-666a153e435e to /var/tmp/towardsdatascience-com-3-tools-to-track-and-visualize-the-execution-of-your-python-code-666a153e435e.html
 2021-05-30 23:19:28,476 - page-loader - INFO - FINISH
+2021-06-04 07:27:09,600 - page-loader - INFO - START
+2021-06-04 07:27:09,602 - page-loader - DEBUG - Start downloading https://books.toscrape.com/catalogue/a-light-in-the-attic_1000/index.html to result/books-toscrape-com-catalogue-a-light-in-the-attic_1000-index.html
+2021-06-04 07:27:09,602 - page-loader - DEBUG - Start downloading assets
+2021-06-04 07:27:18,107 - page-loader - DEBUG - Finish downloading assets
+2021-06-04 07:27:18,110 - page-loader - DEBUG - Finish downloading {page_url} to {page_file_path}
+2021-06-04 07:27:18,110 - page-loader - INFO - FINISH
