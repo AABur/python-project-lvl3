@@ -34,11 +34,9 @@ def download(page_url: str, target_dir: str = '') -> str:
     page_file_path = Path(target_dir, local_page_name)
     assets_local_dir = Path(target_dir, assets_dir_name)
     logger.debug(f'Start downloading {page_url} to {page_file_path}')
-    Path(assets_local_dir).mkdir()
-    # collect remote assets and prepare local html-page
     local_html = fetch_assets(page_url, assets_dir_name, assets_local_dir)
-    Path(page_file_path).write_text(local_html)  # save html-page locally
-    logger.debug('Finish downloading {page_url} to {page_file_path}')
+    Path(page_file_path).write_text(local_html)
+    logger.debug(f'Finish downloading {page_url} to {page_file_path}')
     return str(page_file_path)
 
 
@@ -58,6 +56,7 @@ def fetch_assets(page_url: str, assets_dir_name: str, assets_local_dir: Path) ->
         soup = BeautifulSoup(requests.get(page_url).text, 'lxml')
     except Exception:
         logger.error('Failed access', exc_info=True)
+    Path(assets_local_dir).mkdir()
     page_url = page_url if page_url.endswith('/') else f'{page_url}/'
     with IncrementalBar(
         'Downloading',
