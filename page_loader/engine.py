@@ -38,20 +38,18 @@ def download(page_url: str, target_dir: str = '') -> str:
     try:
         Path(assets_local_dir).mkdir()
     except Exception:
-        logger.error('Failed to mkdir', exc_info=True)
-        sys.exit(1)
+        handle_exception('Failed to mkdir')
     # collect remote assets and prepare local html-page
     local_html = fetch_assets(page_url, assets_dir_name, assets_local_dir)
     try:
         Path(page_file_path).write_text(local_html)  # save html-page locally
     except Exception:
-        logger.error('Failed to write file', exc_info=True)
-        sys.exit(1)
+        handle_exception('Failed to write file')
     logger.debug('Finish downloading {page_url} to {page_file_path}')
     return str(page_file_path)
 
 
-def fetch_assets(page_url: str, assets_dir_name: str, assets_local_dir: Path) -> Any:  # noqa:WPS210,E501
+def fetch_assets(page_url: str, assets_dir_name: str, assets_local_dir: Path) -> Any:  # noqa: E501
     """Download assets from given HTML page and store it in assets directory.
 
     Args:
@@ -63,7 +61,10 @@ def fetch_assets(page_url: str, assets_dir_name: str, assets_local_dir: Path) ->
         Any: [description]
     """
     logger.debug('Start downloading assets')
-    soup = BeautifulSoup(requests.get(page_url).text, 'lxml')
+    try:
+        soup = BeautifulSoup(requests.get(page_url).text, 'lxml')
+    except Exception:
+        handle_exception('Failed access')
     page_url = page_url if page_url.endswith('/') else f'{page_url}/'
     with IncrementalBar(
         'Downloading',
@@ -80,17 +81,20 @@ def fetch_assets(page_url: str, assets_dir_name: str, assets_local_dir: Path) ->
                 try:
                     get_asset(assets_local_dir, full_asset_url, local_file_name)
                 except ConnectionError:
-                    logger.error('Failed access asset', exc_info=True)
-                    sys.exit(1)
+                    handle_exception('Failed access asset')
                 except IOError:
-                    logger.error('Failed write asset file', exc_info=True)
-                    sys.exit(1)
+                    handle_exception('Failed write asset file')
                 source_tag[attribute_name] = Path(
                     assets_dir_name, local_file_name,
                 )
             bar.next()  # noqa:B305
     logger.debug('Finish downloading assets')
     return soup.prettify(formatter='html5')
+
+
+def handle_exception(message):
+    logger.error(message, exc_info=True)
+    sys.exit(1)
 
 
 def get_asset(assets_local_dir, full_asset_url, local_file_name):
