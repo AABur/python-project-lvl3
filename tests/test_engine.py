@@ -59,14 +59,30 @@ def test_download_html(tmpdir, requests_mock, files):
 
 
 @pytest.mark.parametrize(
-    'url, exception',
+    'exception',
     [
-        ('https://badurl.com', requests.exceptions.ConnectTimeout),
-        ('https://badurl.com', requests.exceptions.ConnectionError),
-        ('https://badurl.com', requests.exceptions.HTTPError),
+        (requests.exceptions.ConnectTimeout),
+        (requests.exceptions.ConnectionError),
+        (requests.exceptions.HTTPError),
     ],
 )
-def test_network_errors(requests_mock, tmpdir, url, exception):
-    requests_mock.get(url, exc=exception)
+def test_network_exceptions(requests_mock, tmpdir, exception):
+    requests_mock.get(PAGE_URL, exc=exception)
     with pytest.raises(Exception):
-        download(url, tmpdir)
+        download(PAGE_URL, tmpdir)
+
+
+@pytest.mark.parametrize('status_code', [
+    400, 401, 403, 404, 500, 502,
+])
+def test_http_status(requests_mock, tmpdir, status_code):
+    requests_mock.get(PAGE_URL, status_code=status_code)
+    with pytest.raises(Exception):
+        download(PAGE_URL, tmpdir)
+
+
+def test_os_error(tmpdir):
+    tempdir = Path(tmpdir)
+    tempdir.chmod(0o444)
+    with pytest.raises(Exception):
+        download(PAGE_URL, tempdir)
