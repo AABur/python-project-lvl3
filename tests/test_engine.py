@@ -79,10 +79,3 @@ def test_http_status(requests_mock, tmpdir, status_code):
     requests_mock.get(PAGE_URL, status_code=status_code)
     with pytest.raises(Exception):
         download(PAGE_URL, tmpdir)
-
-
-def test_os_error(tmpdir):
-    tempdir = Path(tmpdir)
-    tempdir.chmod(0o444)
-    with pytest.raises(Exception):
-        download(PAGE_URL, tempdir)
