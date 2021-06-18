@@ -6,6 +6,7 @@
 # 'requests_mock' fixture
 # https://requests-mock.readthedocs.io/en/latest/pytest.html
 
+import os
 from pathlib import Path, PurePath
 from urllib.parse import urljoin
 
@@ -79,3 +80,12 @@ def test_http_status(requests_mock, tmpdir, status_code):
     requests_mock.get(PAGE_URL, status_code=status_code)
     with pytest.raises(Exception):
         download(PAGE_URL, tmpdir)
+
+
+def test_connection_error(requests_mock, tmpdir):
+    invalid_url = 'https://badsite.com'
+    requests_mock.get(invalid_url, exc=requests.exceptions.ConnectionError)
+    assert not os.listdir(tmpdir)
+    with pytest.raises(Exception):
+        assert download(invalid_url, tmpdir)
+    assert not os.listdir(tmpdir)
