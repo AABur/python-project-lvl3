@@ -4,15 +4,17 @@
 Returns:
     str: local HTML page
 """
+
 import logging
+import os
 import re
 from pathlib import Path
 from typing import Any
 from urllib.parse import urljoin, urlparse
 
 import requests
-from bs4 import BeautifulSoup  # type: ignore
-from progress.bar import IncrementalBar  # type: ignore
+from bs4 import BeautifulSoup
+from progress.bar import IncrementalBar
 
 logger = logging.getLogger('page-loader')
 
@@ -56,6 +58,7 @@ def fetch_assets(page_url: str, assets_dir_name: str, assets_local_dir: Path) ->
         soup = BeautifulSoup(requests.get(page_url).text, 'lxml')
     except Exception:
         logger.error('Failed access', exc_info=True)
+        os._exit(1)  # noqa:WPS437
     Path(assets_local_dir).mkdir()
     page_url = page_url if page_url.endswith('/') else f'{page_url}/'
     with IncrementalBar(
