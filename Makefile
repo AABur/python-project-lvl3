@@ -19,6 +19,10 @@ build: ## Check and builds a package
 	@make check
 	@poetry build
 
+package-install: ## build and install
+	make build
+	pip install dist/*.whl
+
 cc-coverage: ## Prepare coverage report for Codeclimate
 	poetry run coverage xml
 
@@ -26,5 +30,5 @@ help: ## This help message
 	@echo "Available commands:"
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
-.PHONY: install test lint selfcheck check build cc-coverage help
+.PHONY: install test lint selfcheck check build package-install cc-coverage help
 .DEFAULT_GOAL := help
