@@ -58,7 +58,7 @@ def fetch_assets(page_url: str, assets_dir_name: str, assets_local_dir: Path) ->
         soup = BeautifulSoup(requests.get(page_url).text, 'lxml')
     except Exception:
         logger.error('Failed access', exc_info=True)
-        os._exit(1)  # noqa:WPS437
+        os._exit(0)  # noqa:WPS437
     Path(assets_local_dir).mkdir()
     page_url = page_url if page_url.endswith('/') else f'{page_url}/'
     with IncrementalBar(
