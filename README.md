@@ -38,9 +38,9 @@ $ page-loader --output /var/tmp https://ru.hexlet.io/courses
 /var/tmp/ru-hexlet-io-courses.html
 ```
 
-## Usage exemple
+## Usage example
 
-[![asciicast](https://asciinema.org/a/Fl0mOTIghmgc3DzwD6bsex4fX.svg)](https://asciinema.org/a/Fl0mOTIghmgc3DzwD6bsex4fX?autoplay=1&speed=2&preload=1&size=medium)
+[![asciicast](https://asciinema.org/a/yWAftsoaZHnokD6gv8W0B3Hur.svg)](https://asciinema.org/a/yWAftsoaZHnokD6gv8W0B3Hur?autoplay=1&speed=2&preload=1&size=medium)
 
 ## Contributing
 
