@@ -59,20 +59,6 @@ def test_download_html(tmpdir, requests_mock, files):
     assert epb == apb
 
 
-@pytest.mark.parametrize(
-    'exception',
-    [
-        (requests.exceptions.ConnectTimeout),
-        (requests.exceptions.ConnectionError),
-        (requests.exceptions.HTTPError),
-    ],
-)
-def test_network_exceptions(requests_mock, tmpdir, exception):
-    requests_mock.get(PAGE_URL, exc=exception)
-    with pytest.raises(Exception):
-        download(PAGE_URL, tmpdir)
-
-
 @pytest.mark.parametrize('status_code', [
     400, 401, 403, 404, 500, 502,
 ])
@@ -85,7 +71,4 @@ def test_http_status(requests_mock, tmpdir, status_code):
 def test_connection_error(requests_mock, tmpdir):
     invalid_url = 'https://badsite.com'
     requests_mock.get(invalid_url, exc=requests.exceptions.ConnectionError)
-    assert not os.listdir(tmpdir)
-    with pytest.raises(Exception):
-        assert download(invalid_url, tmpdir)
     assert not os.listdir(tmpdir)
