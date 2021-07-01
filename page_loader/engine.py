@@ -32,7 +32,7 @@ def download(page_url: str, target_dir: str = '') -> str:
         str: local HTML file full path
     """
     local_page_name = compose_local_name(page_url)
-    assets_dir_name = compose_local_name(page_url, 'dir')
+    assets_dir_name = compose_local_name(page_url, is_dir=True)
     page_file_path = Path(target_dir, local_page_name)
     assets_local_dir = Path(target_dir, assets_dir_name)
     logger.debug(f'Start downloading {page_url} to {page_file_path}')
@@ -92,12 +92,12 @@ def get_asset(assets_local_dir, full_asset_url, local_file_name):
     Path(assets_local_dir, local_file_name).write_bytes(asset_content)
 
 
-def compose_local_name(resource_url: str, resource_type: str = '') -> str:
+def compose_local_name(resource_url: str, is_dir: bool = False) -> str:
     """Compose a path name for a resource.
 
     Args:
         resource_url (str): resource url
-        resource_type (str): resource type
+        is_dir (bool): resource type
 
     Returns:
         str: resource local file name
@@ -107,6 +107,6 @@ def compose_local_name(resource_url: str, resource_type: str = '') -> str:
     pattern = rf'{ext}$'
     file_name = re.sub(pattern, '', url_parse.netloc + url_parse.path)
     file_name = re.sub(r'\W+', '-', file_name)
-    if resource_type == 'dir':
+    if is_dir:
         return str(file_name + '_files')  # noqa:WPS336
     return str(file_name + (ext or '.html'))
