@@ -24,7 +24,7 @@ PAGE_URL = 'https://ru.hexlet.io/courses'
     ],
 )
 def test_compose_path_name_page(file_url, file_name):
-    assert file_name == compose_local_name(file_url, 'page')
+    assert file_name == compose_local_name(file_url)
 
 
 @pytest.mark.parametrize(
@@ -39,7 +39,7 @@ def test_compose_path_name_page(file_url, file_name):
 )
 def test_compose_path_name_asset_relative(file_url, file_name):
     full_url = urljoin(PAGE_URL + '/', file_url)  # noqa:WPS336
-    assert file_name == compose_local_name(full_url, 'asset')
+    assert file_name == compose_local_name(full_url)
 
 
 def test_download_html(tmpdir, requests_mock, files):
