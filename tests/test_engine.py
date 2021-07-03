@@ -42,6 +42,22 @@ def test_compose_path_name_asset_relative(file_url, file_name):
     assert file_name == compose_local_name(full_url)
 
 
+@pytest.fixture()
+def files():
+    page_remote_path = Path(PurePath('tests/fixtures/remote-page.html'))
+    page_local_path = Path(PurePath('tests/fixtures/local-page.html'))
+    image_path = Path(PurePath('tests/fixtures/python.png'))
+    link_path = Path(PurePath('tests/fixtures/application.css'))
+    script_path = Path(PurePath('tests/fixtures/runtime.js'))
+    return {
+        'page_remote': page_remote_path.read_bytes(),
+        'page_local': page_local_path.read_bytes(),
+        'image': image_path.read_bytes(),
+        'link': link_path.read_bytes(),
+        'script': script_path.read_bytes(),
+    }
+
+
 def test_download_html(tmpdir, requests_mock, files):
 
     requests_mock.get(PAGE_URL, content=files['page_remote'])
