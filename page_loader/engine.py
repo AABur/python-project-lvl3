@@ -32,64 +32,71 @@ def download(page_url: str, target_dir: str = '') -> str:
         str: local HTML file full path
     """
     local_page_name = compose_local_name(page_url)
-    assets_dir_name = compose_local_name(page_url, is_dir=True)
+    resources_dir_name = compose_local_name(page_url, is_dir=True)
     page_file_path = Path(target_dir, local_page_name)
-    assets_local_dir = Path(target_dir, assets_dir_name)
     logger.debug(f'Start downloading {page_url} to {page_file_path}')
-    local_html = fetch_assets(page_url, assets_dir_name, assets_local_dir)
+    resources_local_dir = Path(target_dir, resources_dir_name)
+    html_page = fetch_html_page(page_url)
+    local_html, resources = prepare_soup(
+        html_page, page_url, resources_dir_name,
+    )
+    fetch_resources(resources, resources_local_dir)
     Path(page_file_path).write_text(local_html)
     logger.debug(f'Finish downloading {page_url} to {page_file_path}')
     return str(page_file_path)
 
 
-def fetch_assets(page_url: str, assets_dir_name: str, assets_local_dir: Path) -> Any:  # noqa: E501, WPS210
-    """Download assets from given HTML page and store it in assets directory.
-
-    Args:
-        page_url (str): given HTML page url
-        assets_dir_name (str): assets directory
-        assets_local_dir (Path): [description]
-
-    Returns:
-        Any: [description]
-    """
-    logger.debug('Start downloading assets')
+def fetch_html_page(page_url: str) -> str:
     try:
-        soup = BeautifulSoup(requests.get(page_url).text, 'lxml')
+        response = requests.get(page_url)
     except Exception:
         logger.error('Failed access', exc_info=True)
         os._exit(0)  # noqa:WPS437
-    Path(assets_local_dir).mkdir()
+    return response.text
+
+
+def prepare_soup(html_page, page_url: str, resources_dir_name: str) -> Any:
+    soup = BeautifulSoup(html_page, 'lxml')
+    resources = {}
     page_url = page_url if page_url.endswith('/') else f'{page_url}/'
+    for source_tag in soup.find_all(TAGS):
+        attribute_name = 'src' if source_tag.name in {
+            'script', 'img',
+        } else 'href'
+        full_resource_url = urljoin(page_url, source_tag.get(attribute_name))
+        if urlparse(full_resource_url).netloc == urlparse(page_url).netloc:
+            local_file_name = compose_local_name(full_resource_url)
+            resources[full_resource_url] = local_file_name
+            source_tag[attribute_name] = Path(
+                resources_dir_name, local_file_name,
+            )
+    local_html_page = soup.prettify(formatter='html5')
+    return local_html_page, resources
+
+
+def fetch_resources(resources, resources_local_dir: Path) -> Any:  # noqa: E501, WPS210
+    logger.debug('Start downloading resources')
+    Path(resources_local_dir).mkdir()
     with IncrementalBar(
         'Downloading',
-        max=len(soup.find_all(TAGS)),
+        max=len(resources),
         suffix='%(percent).1f%% [%(elapsed)ds]',  # noqa:WPS323
     ) as bar:
-        for source_tag in soup.find_all(TAGS):
-            attribute_name = 'src' if source_tag.name in {
-                'script', 'img',
-            } else 'href'
-            full_asset_url = urljoin(page_url, source_tag.get(attribute_name))
-            if urlparse(full_asset_url).netloc == urlparse(page_url).netloc:
-                local_file_name = compose_local_name(full_asset_url)
-                get_asset(assets_local_dir, full_asset_url, local_file_name)
-                source_tag[attribute_name] = Path(
-                    assets_dir_name, local_file_name,
-                )
+        for res_url, res_local in resources.items():
+            get_resource(resources_local_dir, res_url, res_local)
             bar.next()  # noqa:B305
-    logger.debug('Finish downloading assets')
-    return soup.prettify(formatter='html5')
+    logger.debug('Finish downloading resources')
+    return None
 
 
-def get_asset(assets_local_dir, full_asset_url, local_file_name):
+def get_resource(resources_local_dir, full_resource_url, local_file_name):
     try:
-        asset_content = requests.get(full_asset_url).content
+        resource_content = requests.get(full_resource_url).content
     except ConnectionError:
-        logger.error('Failed access asset', exc_info=True)
+        logger.error('Failed access resource', exc_info=True)
     except IOError:
-        logger.error('Failed write asset file', exc_info=True)
-    Path(assets_local_dir, local_file_name).write_bytes(asset_content)
+        logger.error('Failed write resource file', exc_info=True)
+    Path(resources_local_dir, local_file_name).write_bytes(resource_content)
 
 
 def compose_local_name(resource_url: str, is_dir: bool = False) -> str:
