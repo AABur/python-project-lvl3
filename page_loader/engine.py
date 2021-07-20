@@ -35,12 +35,11 @@ def download(page_url: str, target_dir: str = '') -> str:
     resources_dir_name = compose_local_name(page_url, is_dir=True)
     page_file_path = Path(target_dir, local_page_name)
     logger.debug(f'Start downloading {page_url} to {page_file_path}')
-    resources_local_dir = Path(target_dir, resources_dir_name)
     html_page = fetch_html_page(page_url)
     local_html, resources = prepare_soup(
         html_page, page_url, resources_dir_name,
     )
-    fetch_resources(resources, resources_local_dir)
+    fetch_resources(resources, Path(target_dir, resources_dir_name))
     Path(page_file_path).write_text(local_html)
     logger.debug(f'Finish downloading {page_url} to {page_file_path}')
     return str(page_file_path)
@@ -74,7 +73,7 @@ def prepare_soup(html_page, page_url: str, resources_dir_name: str) -> Any:
     return local_html_page, resources
 
 
-def fetch_resources(resources, resources_local_dir: Path) -> Any:  # noqa: E501, WPS210
+def fetch_resources(resources, resources_local_dir: Path) -> Any:
     logger.debug('Start downloading resources')
     Path(resources_local_dir).mkdir()
     with IncrementalBar(
@@ -83,20 +82,15 @@ def fetch_resources(resources, resources_local_dir: Path) -> Any:  # noqa: E501,
         suffix='%(percent).1f%% [%(elapsed)ds]',  # noqa:WPS323
     ) as bar:
         for res_url, res_local in resources.items():
-            get_resource(resources_local_dir, res_url, res_local)
+            try:
+                resource_content = requests.get(res_url).content
+            except ConnectionError:
+                logger.error('Failed access resource', exc_info=True)
+            except IOError:
+                logger.error('Failed write resource file', exc_info=True)
+            Path(resources_local_dir, res_local).write_bytes(resource_content)
             bar.next()  # noqa:B305
     logger.debug('Finish downloading resources')
-    return None
-
-
-def get_resource(resources_local_dir, full_resource_url, local_file_name):
-    try:
-        resource_content = requests.get(full_resource_url).content
-    except ConnectionError:
-        logger.error('Failed access resource', exc_info=True)
-    except IOError:
-        logger.error('Failed write resource file', exc_info=True)
-    Path(resources_local_dir, local_file_name).write_bytes(resource_content)
 
 
 def compose_local_name(resource_url: str, is_dir: bool = False) -> str:
