@@ -6,7 +6,7 @@ Returns:
 """
 
 import logging
-import os
+import sys
 import re
 from pathlib import Path
 from typing import Any
@@ -21,24 +21,12 @@ logger = logging.getLogger('page-loader')
 TAGS = ('link', 'script', 'img')
 
 
-def download(page_url: str, target_dir: str = '') -> str:  # noqa: WPS210
-    """Download the given url to the given path .
-
-    Args:
-        page_url (str): page url
-        target_dir (str): target dir. Defaults to '.'
-
-    Returns:
-        str: local HTML file full path
-    """
-    local_page_name = compose_local_name(page_url)
+def download(page_url: str, target_dir: str = '') -> str:
     resources_dir_name = compose_local_name(page_url, is_dir=True)
-    page_file_path = Path(target_dir, local_page_name)
+    page_file_path = Path(target_dir, compose_local_name(page_url))
     logger.debug(f'Start downloading {page_url} to {page_file_path}')
     html_page = fetch_html_page(page_url)
-    local_html, resources = prepare_soup(
-        html_page, page_url, resources_dir_name,
-    )
+    local_html, resources = prepare_soup(html_page, page_url, resources_dir_name)  # noqa: E501
     fetch_resources(resources, Path(target_dir, resources_dir_name))
     Path(page_file_path).write_text(local_html)
     logger.debug(f'Finish downloading {page_url} to {page_file_path}')
@@ -50,7 +38,7 @@ def fetch_html_page(page_url: str) -> str:
         response = requests.get(page_url)
     except Exception:
         logger.error('Failed access', exc_info=True)
-        os._exit(0)  # noqa:WPS437
+        sys.exit(0)
     return response.text
 
 
@@ -73,7 +61,7 @@ def prepare_soup(html_page, page_url: str, resources_dir_name: str) -> Any:  # n
     return local_html_page, resources
 
 
-def fetch_resources(resources, resources_local_dir: Path) -> Any:
+def fetch_resources(resources, resources_local_dir: Path) -> None:
     logger.debug('Start downloading resources')
     Path(resources_local_dir).mkdir()
     with IncrementalBar(
@@ -83,14 +71,21 @@ def fetch_resources(resources, resources_local_dir: Path) -> Any:
     ) as bar:
         for res_url, res_local in resources.items():
             try:
-                resource_content = requests.get(res_url).content
+                download_file(res_url, res_local, resources_local_dir)
             except ConnectionError:
                 logger.error('Failed access resource', exc_info=True)
             except IOError:
                 logger.error('Failed write resource file', exc_info=True)
-            Path(resources_local_dir, res_local).write_bytes(resource_content)
             bar.next()  # noqa:B305
     logger.debug('Finish downloading resources')
+
+
+def download_file(url, local, local_dir):
+    response = requests.get(url)
+    with open(Path(local_dir, local), 'wb') as file:
+        for chunk in response.iter_content(chunk_size=1024):
+            if chunk:  # filter out keep-alive new chunks
+                file.write(chunk)
 
 
 def compose_local_name(resource_url: str, is_dir: bool = False) -> str:
@@ -105,9 +100,12 @@ def compose_local_name(resource_url: str, is_dir: bool = False) -> str:
     """
     url_parse = urlparse(resource_url)
     ext = Path(url_parse.path).suffix
-    pattern = rf'{ext}$'
-    file_name = re.sub(pattern, '', url_parse.netloc + url_parse.path)
-    file_name = re.sub(r'\W+', '-', file_name)
+    full_path = Path(url_parse.netloc + url_parse.path)
+    name = re.sub(
+        r'\W+',
+        '-',
+        str(full_path.with_suffix('')),
+    )
     if is_dir:
-        return str(file_name + '_files')  # noqa:WPS336
-    return str(file_name + (ext or '.html'))
+        return '{0}_files'.format(name)
+    return '{0}{1}'.format(name, (ext or '.html'))
