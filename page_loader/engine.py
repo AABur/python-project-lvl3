@@ -6,8 +6,8 @@ Returns:
 """
 
 import logging
+import os
 import re
-import sys
 from pathlib import Path
 from typing import Any
 from urllib.parse import urljoin, urlparse
@@ -55,7 +55,7 @@ def fetch_html_page(page_url: str) -> str:
         response = requests.get(page_url)
     except Exception:
         logger.error('Failed access', exc_info=True)
-        sys.exit(0)
+        os._exit(0)  # noqa:WPS437
     return response.text
 
 
