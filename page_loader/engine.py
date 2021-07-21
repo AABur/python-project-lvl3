@@ -1,13 +1,13 @@
 # -*- coding:utf-8 -*-
-"""Download the content of the given HTML file and return the content.
+"""Download content of the given HTML file and save it to specified directory.
 
 Returns:
-    str: local HTML page
+    str: saved HTML page path
 """
 
 import logging
-import sys
 import re
+import sys
 from pathlib import Path
 from typing import Any
 from urllib.parse import urljoin, urlparse
@@ -22,6 +22,15 @@ TAGS = ('link', 'script', 'img')
 
 
 def download(page_url: str, target_dir: str = '') -> str:
+    """Download a page from a page.
+
+    Args:
+        page_url (str): url to download
+        target_dir (str): [optional] [defaults = ''] target directory.
+
+    Returns:
+        str: saved HTML page path
+    """
     resources_dir_name = compose_local_name(page_url, is_dir=True)
     page_file_path = Path(target_dir, compose_local_name(page_url))
     logger.debug(f'Start downloading {page_url} to {page_file_path}')
@@ -34,6 +43,14 @@ def download(page_url: str, target_dir: str = '') -> str:
 
 
 def fetch_html_page(page_url: str) -> str:
+    """Fetch a page HTML from a page URL.
+
+    Args:
+        page_url (str): page url
+
+    Returns:
+        str: page HTML text
+    """
     try:
         response = requests.get(page_url)
     except Exception:
@@ -42,7 +59,18 @@ def fetch_html_page(page_url: str) -> str:
     return response.text
 
 
-def prepare_soup(html_page, page_url: str, resources_dir_name: str) -> Any:  # noqa: WPS210, E501
+def prepare_soup(html_page: str, page_url: str, resources_dir_name: str) -> Any:  # noqa: WPS210, E501
+    """Prepare the HTML for the given HTML page .
+
+    Args:
+        html_page (str): HTML text
+        page_url (str): page url
+        resources_dir_name (str): dir name for the page resources
+
+    Returns:
+        local_html_page (str): HTML page with replaced resources file names
+        resources (dict): dict with resircers urls matched to local files
+    """
     soup = BeautifulSoup(html_page, 'lxml')
     resources = {}
     page_url = page_url if page_url.endswith('/') else f'{page_url}/'
@@ -61,7 +89,13 @@ def prepare_soup(html_page, page_url: str, resources_dir_name: str) -> Any:  # n
     return local_html_page, resources
 
 
-def fetch_resources(resources, resources_local_dir: Path) -> None:
+def fetch_resources(resources: dict, resources_local_dir: Path) -> None:
+    """Download the resources into the local directory.
+
+    Args:
+        resources (dict): dict with resircers urls matched to local files
+        resources_local_dir (Path): resources local directory
+    """
     logger.debug('Start downloading resources')
     Path(resources_local_dir).mkdir()
     with IncrementalBar(
@@ -80,7 +114,14 @@ def fetch_resources(resources, resources_local_dir: Path) -> None:
     logger.debug('Finish downloading resources')
 
 
-def download_file(url, local, local_dir):
+def download_file(url: str, local: str, local_dir: Path):
+    """Download a file from a URL.
+
+    Args:
+        url (str): file url
+        local (str): file local name
+        local_dir (Path): target directory
+    """
     response = requests.get(url)
     with open(Path(local_dir, local), 'wb') as file:
         for chunk in response.iter_content(chunk_size=1024):
