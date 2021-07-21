@@ -21,7 +21,7 @@ logger = logging.getLogger('page-loader')
 TAGS = ('link', 'script', 'img')
 
 
-def download(page_url: str, target_dir: str = '') -> str:
+def download(page_url: str, target_dir: str = '') -> str:  # noqa: WPS210
     """Download the given url to the given path .
 
     Args:
@@ -54,7 +54,7 @@ def fetch_html_page(page_url: str) -> str:
     return response.text
 
 
-def prepare_soup(html_page, page_url: str, resources_dir_name: str) -> Any:
+def prepare_soup(html_page, page_url: str, resources_dir_name: str) -> Any:  # noqa: WPS210, E501
     soup = BeautifulSoup(html_page, 'lxml')
     resources = {}
     page_url = page_url if page_url.endswith('/') else f'{page_url}/'
