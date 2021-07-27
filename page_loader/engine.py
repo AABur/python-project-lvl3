@@ -122,7 +122,7 @@ def download_file(url: str, local: str, local_dir: Path):
         local (str): file local name
         local_dir (Path): target directory
     """
-    response = requests.get(url)
+    response = requests.get(url, stream=True)
     with open(Path(local_dir, local), 'wb') as file:
         for chunk in response.iter_content(chunk_size=1024):
             if chunk:  # filter out keep-alive new chunks
