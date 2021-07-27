@@ -79,7 +79,7 @@ def prepare_soup(html_page: str, page_url: str, resources_dir_name: str) -> Any:
             'script', 'img',
         } else 'href'
         full_resource_url = urljoin(page_url, source_tag.get(attribute_name))
-        if urlparse(full_resource_url).netloc == urlparse(page_url).netloc:
+        if is_local_resource(page_url, full_resource_url):
             local_file_name = compose_local_path_name(full_resource_url)
             resources[full_resource_url] = local_file_name
             source_tag[attribute_name] = Path(
@@ -87,6 +87,10 @@ def prepare_soup(html_page: str, page_url: str, resources_dir_name: str) -> Any:
             )
     local_html_page = soup.prettify(formatter='html5')
     return local_html_page, resources
+
+
+def is_local_resource(page_url, full_resource_url):
+    return urlparse(full_resource_url).netloc == urlparse(page_url).netloc
 
 
 def fetch_resources(resources: dict, resources_local_dir: Path) -> None:
