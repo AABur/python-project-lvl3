@@ -75,9 +75,7 @@ def prepare_soup(html_page: str, page_url: str, resources_dir_name: str) -> Any:
     resources = {}
     page_url = page_url if page_url.endswith('/') else f'{page_url}/'
     for source_tag in soup.find_all(TAGS):
-        attribute_name = 'src' if source_tag.name in {
-            'script', 'img',
-        } else 'href'
+        attribute_name = get_attribute_ref(source_tag.name)
         full_resource_url = urljoin(page_url, source_tag.get(attribute_name))
         if is_local_resource(page_url, full_resource_url):
             local_file_name = compose_local_path_name(full_resource_url)
@@ -87,6 +85,14 @@ def prepare_soup(html_page: str, page_url: str, resources_dir_name: str) -> Any:
             )
     local_html_page = soup.prettify(formatter='html5')
     return local_html_page, resources
+
+
+def get_attribute_ref(tag_name):
+    attribute_ref = {
+        'script': 'src',
+        'img': 'src',
+    }
+    return attribute_ref.get(tag_name, 'href')
 
 
 def is_local_resource(page_url, full_resource_url):
