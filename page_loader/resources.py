@@ -6,6 +6,9 @@ from urllib.parse import urlparse
 
 import requests
 from progress.bar import IncrementalBar
+from requests.exceptions import RequestException
+
+from page_loader.exceptions import PLIOError, PLNetworkError
 
 logger = logging.getLogger('page-loader')
 
@@ -13,12 +16,6 @@ TAGS = ('link', 'script', 'img')
 
 
 def fetch_resources(resources: dict, resources_local_dir: Path) -> None:
-    """Download the resources into the local directory.
-
-    Args:
-        resources (dict): dict with resircers urls matched to local files
-        resources_local_dir (Path): resources local directory
-    """
     logger.debug('Start downloading resources')
     Path(resources_local_dir).mkdir()
     with IncrementalBar(
@@ -29,10 +26,12 @@ def fetch_resources(resources: dict, resources_local_dir: Path) -> None:
         for res_url, res_local in resources.items():
             try:
                 download_file(res_url, res_local, resources_local_dir)
-            except ConnectionError:
+            except RequestException:
                 logger.error('Failed access resource', exc_info=True)
+                raise PLNetworkError
             except IOError:
                 logger.error('Failed write resource file', exc_info=True)
+                raise PLIOError
             bar.next()  # noqa:B305
     logger.debug('Finish downloading resources')
 

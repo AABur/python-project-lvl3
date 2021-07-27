@@ -6,7 +6,6 @@ Returns:
 """
 
 import logging
-import os
 import re
 from pathlib import Path
 from typing import Any
@@ -15,6 +14,7 @@ from urllib.parse import urljoin, urlparse
 import requests
 from bs4 import BeautifulSoup
 
+from page_loader.exceptions import PLNetworkError
 from page_loader.resources import fetch_resources, is_local_resource
 
 logger = logging.getLogger('page-loader')
@@ -44,19 +44,11 @@ def download(page_url: str, target_dir: str = '') -> str:
 
 
 def fetch_html_page(page_url: str) -> str:
-    """Fetch a page HTML from a page URL.
-
-    Args:
-        page_url (str): page url
-
-    Returns:
-        str: page HTML text
-    """
     try:
         response = requests.get(page_url)
     except Exception:
         logger.error('Failed access', exc_info=True)
-        os._exit(0)  # noqa:WPS437
+        raise PLNetworkError
     return response.text
 
 

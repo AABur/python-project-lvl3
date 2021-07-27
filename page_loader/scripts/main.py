@@ -4,9 +4,11 @@
 
 
 import logging
+import sys
 
 from page_loader import download
 from page_loader.cli import arg_parser
+from page_loader.exceptions import PLException
 
 logger = logging.getLogger('page-loader')
 logger.setLevel(logging.DEBUG)
@@ -31,7 +33,11 @@ def main():
     """Download the page."""
     logger.info('START')
     args = arg_parser().parse_args()
-    print(download(args.page_url, args.output_dir))
+    try:
+        local_page_path = download(args.page_url, args.output_dir)
+    except PLException:
+        sys.exit(0)
+    print(local_page_path)
     logger.info('FINISH')
 
 
