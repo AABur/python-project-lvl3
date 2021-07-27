@@ -12,7 +12,7 @@ from urllib.parse import urljoin
 import pytest
 from bs4 import BeautifulSoup  # type: ignore
 
-from page_loader.engine import compose_local_name, download
+from page_loader.engine import compose_local_path_name, download
 
 PAGE_URL = 'https://ru.hexlet.io/courses'
 
@@ -24,7 +24,7 @@ PAGE_URL = 'https://ru.hexlet.io/courses'
     ],
 )
 def test_compose_path_name_page(file_url, file_name):
-    assert file_name == compose_local_name(file_url)
+    assert file_name == compose_local_path_name(file_url)
 
 
 @pytest.mark.parametrize(
@@ -39,7 +39,7 @@ def test_compose_path_name_page(file_url, file_name):
 )
 def test_compose_path_name_asset_relative(file_url, file_name):
     full_url = urljoin(PAGE_URL + '/', file_url)  # noqa:WPS336
-    assert file_name == compose_local_name(full_url)
+    assert file_name == compose_local_path_name(full_url)
 
 
 @pytest.fixture()

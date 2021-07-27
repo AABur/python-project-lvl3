@@ -31,8 +31,8 @@ def download(page_url: str, target_dir: str = '') -> str:
     Returns:
         str: saved HTML page path
     """
-    resources_dir_name = compose_local_name(page_url, is_dir=True)
-    page_file_path = Path(target_dir, compose_local_name(page_url))
+    resources_dir_name = compose_local_path_name(page_url, is_dir=True)
+    page_file_path = Path(target_dir, compose_local_path_name(page_url))
     logger.debug(f'Start downloading {page_url} to {page_file_path}')
     html_page = fetch_html_page(page_url)
     local_html, resources = prepare_soup(html_page, page_url, resources_dir_name)  # noqa: E501
@@ -80,7 +80,7 @@ def prepare_soup(html_page: str, page_url: str, resources_dir_name: str) -> Any:
         } else 'href'
         full_resource_url = urljoin(page_url, source_tag.get(attribute_name))
         if urlparse(full_resource_url).netloc == urlparse(page_url).netloc:
-            local_file_name = compose_local_name(full_resource_url)
+            local_file_name = compose_local_path_name(full_resource_url)
             resources[full_resource_url] = local_file_name
             source_tag[attribute_name] = Path(
                 resources_dir_name, local_file_name,
@@ -129,7 +129,7 @@ def download_file(url: str, local: str, local_dir: Path):
                 file.write(chunk)
 
 
-def compose_local_name(resource_url: str, is_dir: bool = False) -> str:
+def compose_local_path_name(resource_url: str, is_dir: bool = False) -> str:
     """Compose a path name for a resource.
 
     Args:
@@ -139,9 +139,9 @@ def compose_local_name(resource_url: str, is_dir: bool = False) -> str:
     Returns:
         str: resource local file name
     """
-    url_parse = urlparse(resource_url)
-    ext = Path(url_parse.path).suffix
-    full_path = Path(url_parse.netloc + url_parse.path)
+    parsed_url = urlparse(resource_url)
+    ext = Path(parsed_url.path).suffix
+    full_path = Path(parsed_url.netloc + parsed_url.path)
     name = re.sub(
         r'\W+',
         '-',
