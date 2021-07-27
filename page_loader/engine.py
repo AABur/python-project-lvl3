@@ -73,7 +73,7 @@ def prepare_soup(html_page: str, page_url: str, resources_dir_name: str) -> Any:
     """
     soup = BeautifulSoup(html_page, 'lxml')
     resources = {}
-    page_url = page_url if page_url.endswith('/') else f'{page_url}/'
+    # page_url = page_url if page_url.endswith('/') else f'{page_url}/'
     for source_tag in soup.find_all(TAGS):
         attribute_name = get_attribute_ref(source_tag.name)
         full_resource_url = urljoin(page_url, source_tag.get(attribute_name))
