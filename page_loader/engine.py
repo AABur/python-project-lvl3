@@ -64,7 +64,7 @@ def prepare_soup(html_page: str, page_url: str, resources_dir_name: str) -> Any:
         local_html_page (str): HTML page with replaced resources file names
         resources (dict): dict with resircers urls matched to local files
     """
-    soup = BeautifulSoup(html_page, 'lxml')
+    soup = BeautifulSoup(html_page, 'html.parser')
     resources = {}
     for source_tag in soup.find_all(TAGS):
         attribute_name = get_attribute_ref(source_tag.name)
