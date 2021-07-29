@@ -43,11 +43,9 @@ def download(page_url: str, target_dir: str = '') -> str:
 
 
 def fetch_html_page(page_url: str) -> str:
-    try:
-        response = requests.get(page_url)
-    except Exception:
-        logger.error('Failed access', exc_info=True)
-        raise Exception
+    response = requests.get(page_url)
+    if response.status_code != 200:
+        raise Exception('Status code = {}'.format(response.status_code))
     return response.text
 
 
