@@ -14,7 +14,6 @@ from urllib.parse import urljoin, urlparse
 import requests
 from bs4 import BeautifulSoup
 
-from page_loader.exceptions import PLNetworkError
 from page_loader.resources import fetch_resources, is_local_resource
 
 logger = logging.getLogger('page-loader')
@@ -48,7 +47,7 @@ def fetch_html_page(page_url: str) -> str:
         response = requests.get(page_url)
     except Exception:
         logger.error('Failed access', exc_info=True)
-        raise PLNetworkError
+        raise Exception
     return response.text
 
 
