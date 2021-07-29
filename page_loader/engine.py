@@ -44,8 +44,8 @@ def download(page_url: str, target_dir: str = '') -> str:
 
 def fetch_html_page(page_url: str) -> str:
     response = requests.get(page_url)
-    if response.status_code != 200:
-        raise Exception('Status code = {}'.format(response.status_code))
+    if response.status_code != 200:  # noqa: WPS432
+        raise Exception('Status code = {}'.format(response.status_code))  # noqa: P101, E501
     return response.text
 
 
