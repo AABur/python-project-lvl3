@@ -10,7 +10,7 @@ from requests.exceptions import RequestException
 
 from page_loader.exceptions import PLIOError, PLNetworkError
 
-logger = logging.getLogger('page-loader')
+logger = logging.getLogger(__name__)
 
 TAGS = ('link', 'script', 'img')
 

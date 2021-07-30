@@ -16,7 +16,7 @@ from bs4 import BeautifulSoup
 
 from page_loader.resources import fetch_resources, is_local_resource
 
-logger = logging.getLogger('page-loader')
+logger = logging.getLogger(__name__)
 
 TAGS = ('link', 'script', 'img')
 

@@ -9,43 +9,36 @@ from page_loader.cli import arg_parser
 
 logger_config = {
     'version': 1,
-    'disable_existing_loggers': True,
-    'formatters':
-        {
-            'default':
-            {
-                'format': '%(asctime)s - %(name)s - %(levelname)s - %(message)s'  # noqa: C812, E501, WPS323
-            },
+    'disable_existing_loggers': False,
+    'formatters': {
+        'default': {
+            'format': '%(asctime)s - %(name)s - %(levelname)s - %(message)s'  # noqa: C812, E501, WPS323
         },
-    'handlers':
-        {
-            'console':
-            {
-                'class': 'logging.StreamHandler',
-                'formatter': 'default',
-                'level': 'INFO',
-                'stream': 'ext: // sys.stdout',
-            },
-            'file':
-            {
-                'class': 'logging.FileHandler',
-                'formatter': 'default',
-                'filename': 'page-loader.log',
-                'level': 'DEBUG',
-            },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'default',
+            'level': 'INFO',
+            'stream': 'ext: // sys.stdout',
         },
-    'loggers':
-        {
-            'page-loader':
-            {
-                'handlers': ['console', 'file'],
-                'level': 'DEBUG',
-                'propagate': True,
-            },
+        'file': {
+            'class': 'logging.FileHandler',
+            'formatter': 'default',
+            'filename': 'page-loader.log',
+            'level': 'DEBUG',
         },
+    },
+    'loggers': {
+        'root': {
+            'handlers': ['console', 'file'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+    },
 }
 
-logging.coding.dictConfig(logger_config)
+logging.config.dictConfig(logger_config)
 
 logger = logging.getLogger(__name__)
 
