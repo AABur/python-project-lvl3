@@ -38,7 +38,7 @@ logger_config = {
     },
     'loggers': {
         'root': {
-            'handlers': ['console', 'file'],
+            'handlers': ['console_out', 'console_err', 'file'],
             'level': 'DEBUG',
             'propagate': True,
         },
