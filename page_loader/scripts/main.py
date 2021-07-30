@@ -16,17 +16,23 @@ logger_config = {
         },
     },
     'handlers': {
-        'console': {
+        'console_out': {
             'class': 'logging.StreamHandler',
             'formatter': 'default',
-            'level': 'INFO',
+            'level': 'DEBUG',
+            'stream': 'ext: // sys.stdout',
+        },
+        'console_err': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'default',
+            'level': 'ERROR',
             'stream': 'ext: // sys.stdout',
         },
         'file': {
             'class': 'logging.FileHandler',
             'formatter': 'default',
             'filename': 'page-loader.log',
-            'level': 'DEBUG',
+            'level': 'INFO',
         },
     },
     'loggers': {
