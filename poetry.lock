@@ -514,7 +514,7 @@ python-versions = "*"
 
 [[package]]
 name = "progress"
-version = "1.5"
+version = "1.6"
 description = "Easy to use progress bars"
 category = "main"
 optional = false
@@ -927,7 +927,7 @@ testing = ["pytest (>=4.6)", "pytest-checkdocs (>=1.2.3)", "pytest-flake8", "pyt
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.6"
-content-hash = "2718a09a14a0faa28488f3a015495c61e1fddc91a5829907dda34fc268e62537"
+content-hash = "8f818abdd7dfc5af0e25a34d4960de25ea89164317d3c20ab0b03734be52b93d"
 
 [metadata.files]
 astor = [
@@ -1223,7 +1223,7 @@ pprintpp = [
     {file = "pprintpp-0.4.0.tar.gz", hash = "sha256:ea826108e2c7f49dc6d66c752973c3fc9749142a798d6b254e1e301cfdbc6403"},
 ]
 progress = [
-    {file = "progress-1.5.tar.gz", hash = "sha256:69ecedd1d1bbe71bf6313d88d1e6c4d2957b7f1d4f71312c211257f7dae64372"},
+    {file = "progress-1.6.tar.gz", hash = "sha256:c9c86e98b5c03fa1fe11e3b67c1feda4788b8d0fe7336c2ff7d5644ccfba34cd"},
 ]
 py = [
     {file = "py-1.10.0-py2.py3-none-any.whl", hash = "sha256:3b80836aa6d1feeaa108e046da6423ab8f6ceda6468545ae8d02d9d58d18818a"},
