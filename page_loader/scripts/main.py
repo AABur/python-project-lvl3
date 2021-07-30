@@ -24,6 +24,7 @@ logger_config = {
                 'class': 'logging.StreamHandler',
                 'formatter': 'default',
                 'level': 'INFO',
+                'stream': 'ext: // sys.stdout',
             },
             'file':
             {
