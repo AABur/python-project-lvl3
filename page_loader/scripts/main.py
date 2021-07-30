@@ -3,6 +3,7 @@
 """Download a page from the command line."""
 
 import logging
+from logging.config import dictConfig
 
 from page_loader import download
 from page_loader.cli import arg_parser
@@ -44,7 +45,7 @@ logger_config = {
     },
 }
 
-logging.config.dictConfig(logger_config)
+dictConfig(logger_config)
 
 logger = logging.getLogger(__name__)
 
